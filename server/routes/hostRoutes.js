@@ -40,5 +40,26 @@ router.post('/register', async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 });
-
+router.post('/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+  
+      const foundHost = await Host.findOne({ email });
+      if (!foundHost) {
+        return res.status(400).json({ message: 'User not found' });
+      }
+  
+      const isMatch = await bcrypt.compare(password, foundHost.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+  
+      
+      return res.json({ message: 'Login successful!' });
+  
+    } catch (error) {
+      console.error('Login error:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+  });
 export default router;

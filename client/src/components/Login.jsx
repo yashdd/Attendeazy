@@ -1,31 +1,45 @@
+// src/pages/UserLogin.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";  // if you want to redirect after login
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase.js";
+import { useNavigate } from "react-router-dom";
+import.meta.env
 
 export default function UserLogin() {
-  const navigate = useNavigate(); // only if you want redirect ability
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = (e) => {
+    console.log("Login button clicked")
     e.preventDefault();
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        console.log("Firebase login success:", userCredential.user);
-        // alert("Login successful!");
-        // If you want to redirect:
-        navigate("/");
+
+    const loginData = { email, password };
+    const baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
+    console.log(baseURL)
+    fetch(`${baseURL}/users/login`, {
+      method: "POST",
+      credentials: "include", // 🔥 This enables cookie/session
+
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(loginData),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errorData = await res.json();
+          alert(errorData.message || "Login failed");
+          return;
+        }
+        // success
+        alert("Login successful!");
+        window.location.href = "/"; 
       })
-      .catch((error) => {
-        console.error("Firebase login error:", error);
-        alert(error.message || "Login failed");
+      .catch((err) => {
+        console.error("Error logging in:", err);
+        alert("Something went wrong. Please try again.");
       });
   };
 
   return (
     <div className="relative min-h-screen bg-gray-50">
-      {/* Wave shape at the top */}
       <div className="absolute top-0 left-0 w-full h-[200px] overflow-hidden">
         <svg
           className="w-full h-full"
@@ -53,7 +67,7 @@ export default function UserLogin() {
             User Login
           </h2>
 
-          {/* onSubmit triggers handleLogin */}
+
           <form onSubmit={handleLogin}>
             {/* Email Field */}
             <div className="mb-4">
@@ -64,7 +78,6 @@ export default function UserLogin() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
               />
             </div>
 
@@ -77,7 +90,6 @@ export default function UserLogin() {
                 placeholder="********"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
               />
             </div>
 

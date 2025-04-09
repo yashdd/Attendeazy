@@ -1,10 +1,37 @@
 // src/pages/HostLogin.jsx
-import React from "react";
+import React, { useState } from "react";
 
 export default function HostLogin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleHostLogin = (e) => {
+    e.preventDefault();
+
+    const loginData = { email, password };
+
+    fetch("/api/hosts/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(loginData),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errorData = await res.json();
+          alert(errorData.message || "Host login failed");
+          return;
+        }
+        alert("Host login successful!");
+        // e.g. redirect to host dashboard or something
+      })
+      .catch((err) => {
+        console.error("Host login error:", err);
+        alert("Something went wrong. Please try again.");
+      });
+  };
+
   return (
     <div className="relative min-h-screen bg-gray-50">
-      {/* Wave Shape at the Top (same gradient as UserLogin) */}
       <div className="absolute top-0 left-0 w-full h-[200px] overflow-hidden">
         <svg
           className="w-full h-full"
@@ -26,24 +53,25 @@ export default function HostLogin() {
         </svg>
       </div>
 
-      {/* Main Content: offset for navbar and wave */}
       <div className="pt-40 pb-20 flex items-center justify-center">
         <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8 mx-4">
           <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
             Host Login
           </h2>
 
-          <form>
-            {/* Host Email */}
+          <form onSubmit={handleHostLogin}>
+            {/* Email */}
             <div className="mb-4">
-              <label className="block mb-1 text-gray-700">Host Email</label>
+              <label className="block mb-1 text-gray-700">Email</label>
               <input
                 type="email"
                 className="w-full border border-gray-300 p-2 rounded focus:outline-none"
                 placeholder="host@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
-
             {/* Password */}
             <div className="mb-6">
               <label className="block mb-1 text-gray-700">Password</label>
@@ -51,21 +79,24 @@ export default function HostLogin() {
                 type="password"
                 className="w-full border border-gray-300 p-2 rounded focus:outline-none"
                 placeholder="********"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
-
+            {/* Submit */}
             <button
               type="submit"
               className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition"
             >
-              Log In as Host
+              Log In
             </button>
           </form>
 
           <p className="mt-4 text-sm text-gray-600 text-center">
             Not a host?{" "}
             <a href="/register" className="text-purple-600 hover:underline">
-              Register as a User
+              Register as User
             </a>
           </p>
         </div>
