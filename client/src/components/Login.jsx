@@ -1,113 +1,159 @@
-// src/pages/UserLogin.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import.meta.env
 
 export default function UserLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = (e) => {
-    console.log("Login button clicked")
     e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     const loginData = { email, password };
     const baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
-    console.log(baseURL)
+    
     fetch(`${baseURL}/users/login`, {
       method: "POST",
-      credentials: "include", // 🔥 This enables cookie/session
-
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(loginData),
     })
       .then(async (res) => {
         if (!res.ok) {
           const errorData = await res.json();
-          alert(errorData.message || "Login failed");
+          setError(errorData.message || "Login failed");
           return;
         }
-        // success
-        alert("Login successful!");
-        window.location.href = "/"; 
+        window.location.href = "/";
       })
       .catch((err) => {
         console.error("Error logging in:", err);
-        alert("Something went wrong. Please try again.");
+        setError("Something went wrong. Please try again.");
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
   return (
-    <div className="relative min-h-screen bg-gray-50">
-      <div className="absolute top-0 left-0 w-full h-[200px] overflow-hidden">
-        <svg
-          className="w-full h-full"
-          viewBox="0 0 1440 320"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fill="url(#gradientColor)"
-            fillOpacity="1"
-            d="M0,32L30,37.3C60,42,120,53,180,80C240,107,300,149,360,154.7C420,160,480,128,540,106.7C600,85,660,75,720,112C780,149,840,235,900,256C960,277,1020,235,1080,202.7C1140,171,1200,149,1260,165.3C1320,181,1380,235,1410,261.3L1440,288L1440,0L1410,0C1380,0,1320,0,1260,0C1200,0,1140,0,1080,0C1020,0,960,0,900,0C840,0,780,0,720,0C660,0,600,0,540,0C480,0,420,0,360,0C300,0,240,0,180,0C120,0,60,0,30,0L0,0Z"
-          />
-          <defs>
-            <linearGradient id="gradientColor" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#9F7AEA" />
-              <stop offset="100%" stopColor="#ED64A6" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
+    <div className="min-h-screen bg-white-100 flex flex-col">
+      {/* Main Content */}
+      <div className="flex-grow flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          {/* Card with simple design */}
+          <div className="bg-white rounded-xl shadow-xl overflow-hidden">
+            {/* Top accent bar */}
+            <div className="h-2 bg-rose-600"></div>
+            
+            <div className="p-8">
+              {/* Logo/Icon */}
+              <div className="flex justify-center mb-6">
+                <div className="rounded-full bg-rose-600 p-3 shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              </div>
+              
+              <h2 className="text-2xl font-bold mb-1 text-center text-gray-800">
+                User Login
+              </h2>
+              <p className="text-center text-gray-500 mb-6">Access your Event Attendance dashboard</p>
 
-      <div className="pt-40 pb-20 flex items-center justify-center">
-        <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8 mx-4">
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-            User Login
-          </h2>
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
 
+              <form onSubmit={handleLogin}>
+                {/* Email */}
+                <div className="mb-4">
+                  <label className="flex mb-1 text-gray-700 text-sm font-medium">Email Address</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                      </svg>
+                    </div>
+                    <input
+                      type="email"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                
+                {/* Password */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-gray-700 text-sm font-medium">Password</label>
+                    <a href="/forgot-password" className="text-sm text-rose-600 hover:text-rose-500">
+                      Forgot password?
+                    </a>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="password"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`w-full bg-rose-600 text-white py-2 px-4 rounded-lg flex items-center justify-center transition
+                    ${isLoading ? "opacity-75 cursor-not-allowed" : "hover:bg-rose-700 shadow-md hover:shadow-lg"}`}
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Logging In...
+                    </>
+                  ) : (
+                    "Log In"
+                  )}
+                </button>
+              </form>
 
-          <form onSubmit={handleLogin}>
-            {/* Email Field */}
-            <div className="mb-4">
-              <label className="block mb-1 text-gray-700">Email</label>
-              <input
-                type="email"
-                className="w-full border border-gray-300 p-2 rounded focus:outline-none"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="flex flex-col space-y-4">
+                  <p className="text-sm text-gray-600 text-center">
+                    Don't have an account?{" "}
+                    <a href="/register" className="text-rose-600 hover:underline font-medium">
+                      Sign Up
+                    </a>
+                  </p>
+                  <p className="text-sm text-gray-600 text-center">
+                    <a href="/hostLogin" className="text-gray-600 hover:text-gray-800">
+                      Host Login
+                    </a>
+                  </p>
+                </div>
+              </div>
             </div>
-
-            {/* Password Field */}
-            <div className="mb-6">
-              <label className="block mb-1 text-gray-700">Password</label>
-              <input
-                type="password"
-                className="w-full border border-gray-300 p-2 rounded focus:outline-none"
-                placeholder="********"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition"
-            >
-              Log In
-            </button>
-          </form>
-
-          <p className="mt-4 text-sm text-gray-600 text-center">
-            Don’t have an account?{" "}
-            <a href="/register" className="text-purple-600 hover:underline">
-              Sign Up
-            </a>
-          </p>
+          </div>
         </div>
       </div>
     </div>

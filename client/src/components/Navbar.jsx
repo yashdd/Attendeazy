@@ -1,5 +1,4 @@
-// src/components/Navbar.jsx
-
+ 
 import { useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -7,8 +6,11 @@ import { useNavigate } from "react-router-dom";
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [session, setSession] = useState(null);
+
   const baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
-const navigate = useNavigate();
+
+ const navigate = useNavigate();
+
   useEffect(() => {
     fetch(`${baseURL}/session`, {
       credentials: "include",
@@ -50,10 +52,10 @@ const navigate = useNavigate();
 
         {/* Desktop Menu */}
         <ul className="hidden md:flex space-x-6">
-          <li><a href="#home" className="hover:text-gray-300 transition">Home</a></li>
-          <li><a href="#events" className="hover:text-gray-300 transition">Events</a></li>
-          <li><a href="#about" className="hover:text-gray-300 transition">About</a></li>
-          <li><a href="#contact" className="hover:text-gray-300 transition">Contact</a></li>
+          <li><a href="/" className="hover:text-gray-300 transition">Home</a></li>
+          <li><a href="/events" className="hover:text-gray-300 transition">Events</a></li>
+          <li><a href="/about" className="hover:text-gray-300 transition">About</a></li>
+          <li><a href="/contact" className="hover:text-gray-300 transition">Contact</a></li>
         </ul>
 
         {/* Right-side actions (Desktop) */}
@@ -63,6 +65,9 @@ const navigate = useNavigate();
               <span className="text-gray-300 text-sm">
                 {session.isUser ? "User" : "Host"}: {session.email}
               </span>
+              <a href={session.isHost ? "/hosts/dashboard" : "/users/dashboard"}
+                className="py-1 px-3 bg-indigo-600 text-white rounded hover:bg-indigo-500 transition">
+                Dashboard  </a>
               <button
                 onClick={handleLogout}
                 className="py-1 px-3 bg-red-600 text-white rounded hover:bg-red-500 transition"
@@ -80,7 +85,7 @@ const navigate = useNavigate();
                 Sign Up
               </a>
               <a
-                href="/host"
+                href="/hostLogin"
                 className="py-1 px-3 bg-gray-700 text-white rounded hover:bg-gray-600 transition"
               >
                 Host
@@ -138,7 +143,7 @@ const navigate = useNavigate();
                   Sign Up
                 </a>
                 <a
-                  href="/host"
+                  href="/hostLogin"
                   className="py-1 px-3 bg-gray-700 text-white rounded hover:bg-gray-600 text-center"
                 >
                   Host
