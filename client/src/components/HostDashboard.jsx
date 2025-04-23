@@ -247,7 +247,7 @@ export default function HostDashboard() {
                   </p>
                   
                   <Link
-                    to="/host/dashboard/add"
+                    to="/hosts/dashboard/add"
                     className="bg-white text-blue-700 font-medium py-2 px-4 rounded-lg inline-block text-center hover:bg-blue-50 transition"
                   >
                     Create Event

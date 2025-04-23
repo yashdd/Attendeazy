@@ -13,7 +13,7 @@ export default function AddEvent() {
     date: "",
     time: "",
     location: "",
-    price: "",
+    price: 0,
     category: "",
     isHighlight: false,
   });
@@ -24,9 +24,10 @@ export default function AddEvent() {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "price" ? Number(value) : value,
     }));
   };
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -92,7 +93,7 @@ export default function AddEvent() {
           date: "",
           time: "",
           location: "",
-          price: "",
+          price: 0,
           category: "",
           isHighlight: false,
         });

@@ -50,11 +50,20 @@ export default function EventDetails({}) {
   };
 
   const handleCheckout = async () => {
-    setIsProcessing(true);
+    if (!event || !event._id) {
+      alert("Event data is not loaded properly!");
+      return;
+    }
+    if (!event.price || isNaN(event.price)) {
+      alert("Event price is not loaded properly!");
+      return
+    }
     
+    console.log(event)
+    console.log(event._id)
+    setIsProcessing(true);
+  
     try {
-      // In a real implementation, this would call your backend API
-      // which would create a Stripe checkout session
       const response = await fetch(`${import.meta.env.VITE_BASE_URL}/checkout/create-session`, {
         method: 'POST',
         headers: {
@@ -63,15 +72,19 @@ export default function EventDetails({}) {
         credentials: 'include',
         body: JSON.stringify({
           eventId: event._id,
-          quantity: ticketQuantity,
+          quantity: ticketQuantity
+
         }),
       });
-      
+  
       const session = await response.json();
-      
-      // Redirect to Stripe Checkout
-      window.location.href = session.url;
-      
+      console.log("Chhdeout session:", session);
+      if (session?.url) {
+        window.location.href = session.url;
+      } else {
+        throw new Error('Invalid session response');
+      }
+  
     } catch (error) {
       console.error('Checkout error:', error);
       alert('There was an error processing your payment. Please try again.');
@@ -79,6 +92,7 @@ export default function EventDetails({}) {
       setIsProcessing(false);
     }
   };
+  
 
   if (!event) {
     return (

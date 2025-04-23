@@ -1,9 +1,12 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import User from '../models/User.js';
+import Event from '../models/Event.js';
 import session from 'express-session';
-const router = express.Router();
+import { verifyUser } from '../middlewares/authMiddleware.js';
+import mongoose from 'mongoose';
 
+const router = express.Router();
 router.post('/register', async (req, res) => {
   try {
     const { fullName, email, password, interests } = req.body;
@@ -21,6 +24,8 @@ router.post('/register', async (req, res) => {
       email,
       password: hashedPassword, // store hashed
       interests,
+      registeredEvents: { type: [mongoose.Schema.Types.ObjectId], ref: "Event", default: [] },  
+
     });
 
     return res.status(201).json({
@@ -30,6 +35,7 @@ router.post('/register', async (req, res) => {
         fullName: newUser.fullName,
         email: newUser.email,
         interests: newUser.interests,
+        registeredEvents: []
       },
     });
   } catch (error) {
@@ -74,6 +80,109 @@ router.post('/login', async (req, res) => {
       return res.status(500).json({ message: 'Server error' });
     }
   });
+
+
+  router.get("/profile", verifyUser, async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Unauthorized. No session." });
+      }
+      const user = await User.findById(req.session.userId).select("-password"); // Never send password
+      console.log("User found:", user);
+      if (!user) return res.status(404).json({ message: "User not found" });
+  
+      res.json(user);
+    } catch (err) {
+      console.error("Profile fetch error:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  router.patch("/update-profile", verifyUser, async (req, res) => {
+    try {
+      const updates = req.body;
+  
+      const user = await User.findById(req.session.userId);
+  
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      // Only update fields if they exist in body
+      if (updates.fullName !== undefined) user.fullName = updates.fullName;
+      if (updates.email !== undefined) user.email = updates.email;
+      if (typeof updates.password === 'string' && updates.password.trim() !== '') {
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(updates.password, saltRounds);
+        user.password = hashedPassword;
+      }
+      if (updates.organizationName !== undefined) user.organizationName = updates.organizationName;
+     
+      await user.save();
+  
+      res.json({ message: "Profile updated successfully." });
+    } catch (err) {
+      console.error("Profile update error:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  router.get("/my-registered-events", verifyUser, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const events = await Event.find({ registeredUsers: userId });
+  
+      res.json({ events });
+    } catch (err) {
+      console.error("Error fetching registered events:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  
+  router.post("/register-event", verifyUser, async (req, res) => {
+    try {
+      const { eventId } = req.body;
+      const userId = req.session.userId;
+      console.log(eventId)
+      if (!eventId) {
+        return res.status(400).json({ message: "Event ID is required" });
+      }
+  
+      const user = await User.findById(userId);
+      const event = await Event.findById(eventId);
+  
+      if (!user || !event) {
+        return res.status(404).json({ message: "User or Event not found" });
+      }
+  
+      // Ensure arrays exist
+      if (!Array.isArray(user.registeredEvents)) {
+        user.registeredEvents = [];
+      }
+      if (!Array.isArray(event.registeredUsers)) {
+        event.registeredUsers = [];
+      }
+  
+      // Push event to user if not already registered
+      if (!user.registeredEvents.includes(eventId)) {
+        user.registeredEvents.push(eventId);
+        await user.save();
+      }
+  
+      // Push user to event if not already registered
+      if (!event.registeredUsers.includes(userId)) {
+        event.registeredUsers.push(userId);
+        await event.save();
+      }
+  
+      res.json({ message: "Event registered successfully" });
+    } catch (err) {
+      console.error("Register event error:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  
 
   router.post('/logout', (req, res) => {
     req.session.destroy(() => {

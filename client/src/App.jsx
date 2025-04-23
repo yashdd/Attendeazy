@@ -15,6 +15,10 @@ import AddEvent from "./components/AddEvents.jsx";
 import { Toaster } from "react-hot-toast";
 import MyEvents from "./components/MyEvents.jsx";
 import EventDetails from "./components/EventDetails.jsx";
+import UserDashboard from "./components/UserDashboard/UserDashboard.jsx";
+import EditUserProfile from "./components/UserDashboard/EditUserProfile.jsx";
+import MyTickets from "./components/UserDashboard/MyTickets.jsx";
+
 
 function App() {
   const [showFooter, setShowFooter] = useState(false);
@@ -48,6 +52,10 @@ function App() {
             <Route path="/hosts/dashboard/my-events" element={<MyEvents />} />
             <Route path="/hosts/dashboard/my-events/:id" element={<EventDetails />} />
             <Route path="/events/:id" element={<EventDetails />} />
+            <Route path="/users/dashboard" element={<UserDashboard />} />
+            <Route path="/users/dashboard/edit-profile" element={<EditUserProfile />} />
+            <Route path="/users/dashboard/my-tickets" element={<MyTickets />} />
+
             {/* Add more routes as needed */}
 
 

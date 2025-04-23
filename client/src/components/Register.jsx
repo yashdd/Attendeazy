@@ -52,6 +52,7 @@ export default function Register() {
       interests: selectedInterests,
       isHost,
       organizationName: isHost ? orgName : "",
+      registeredEvents: [] 
     };
 
     try {
@@ -160,8 +161,7 @@ export default function Register() {
                   </div>
                 </div>
 
-                {/* Password */}
-                <div className="mb-4">
+                 <div className="mb-4">
                   <label className="flex mb-1 text-gray-700 text-sm font-medium">Password</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -181,8 +181,7 @@ export default function Register() {
                   </div>
                 </div>
 
-                {/* Confirm Password */}
-                <div className="mb-4">
+                 <div className="mb-4">
                   <label className="flex mb-1 text-gray-700 text-sm font-medium">Confirm Password</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

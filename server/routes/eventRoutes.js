@@ -119,4 +119,6 @@ router.post("/add", upload.single("image"), (req, res) => {
     }
   });
 
+  
+
 export default router;

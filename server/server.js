@@ -7,6 +7,7 @@ import hostRoutes from './routes/hostRoutes.js';
 import cors from 'cors';
 import eventRoutes from './routes/eventRoutes.js';
 import path from 'path';
+import checkoutRoutes from "./routes/checkoutRoutes.js";
 import { fileURLToPath } from "url";
 
 dotenv.config();    
@@ -44,6 +45,8 @@ app.use('/users', userRoutes);
 app.use('/hosts', hostRoutes);   
 app.use('/events', eventRoutes);
 app.use("/assets", express.static(path.join(__dirname, "assets")));
+app.use("/checkout", checkoutRoutes);
+
 
 app.get("/session", (req, res) => {
     res.json({
@@ -52,5 +55,8 @@ app.get("/session", (req, res) => {
       email: req.session?.email || null,
     });
   });
+
+  
+  
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
