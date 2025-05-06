@@ -2,6 +2,7 @@ import express from 'express';
 import Event from '../models/Event.js';
 import multer from "multer";
 import path from "path";
+import { verifyHost } from '../middlewares/authMiddleware.js';
 import fs from "fs"
 
 const router = express.Router();
@@ -74,7 +75,6 @@ router.get("/", async (req, res) => {
   
 
 router.post("/add", upload.single("image"), (req, res) => {
-    console.log(req.session.isHost, req.session.hostId)
     if (!req.session.isHost || !req.session.hostId) {
         return res.status(401).json({ message: "Only hosts can add events" });
     }
@@ -103,13 +103,10 @@ router.post("/add", upload.single("image"), (req, res) => {
       });
   });
   
-  router.get("/host", async (req, res) => {
-    console.log("Host ID:", req.session.hostId);
+  router.get("/host", verifyHost, async (req, res) => {
     if (!req.session.isHost || !req.session.hostId) {
           return res.status(401).json({ message: "Unauthorized: Host login required" });
     }
-
-  
     try {
       const hostEvents = await Event.find({ hostId: req.session.hostId }).sort({ date: -1 });
       res.json({ events: hostEvents });
@@ -119,6 +116,91 @@ router.post("/add", upload.single("image"), (req, res) => {
     }
   });
 
+  router.patch("/edit/:id", upload.single("image"), async (req, res) => {
+    if (!req.session.isHost || !req.session.hostId) {
+      return res.status(401).json({ message: "Only hosts can edit events" });
+    }
+  
+    try {
+      const event = await Event.findById(req.params.id);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+  
+      if (event.hostId.toString() !== req.session.hostId) {
+        return res.status(403).json({ message: "Unauthorized to edit this event" });
+      }
+  
+      const updates = req.body;
+  
+      // If a new image is uploaded, update it
+      if (req.file) {
+        updates.image = `/assets/eventImages/${req.file.filename}`;
+      }
+  
+      // ✅ Merge the updates without touching other fields
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          event[key] = value;
+        }
+      });
+  
+      await event.save();
+  
+      res.json({ message: "Event updated successfully" });
+    } catch (err) {
+      console.error("Patch event error:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  router.delete("/delete/:id", async (req, res) => {
+    if (!req.session.isHost || !req.session.hostId) {
+      return res.status(401).json({ message: "Only hosts can delete events" });
+    }
+  
+    try {
+      const event = await Event.findById(req.params.id);
+  
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+  
+      if (event.hostId.toString() !== req.session.hostId) {
+        return res.status(403).json({ message: "Unauthorized to delete this event" });
+      }
+  
+      await event.deleteOne();
+      res.json({ message: "Event deleted successfully" });
+    } catch (err) {
+      console.error("Delete event error:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+
+  router.get("/stats", verifyHost, async (req, res) => {
+    try {
+      const hostId = req.session.hostId;
+
+      const events = await Event.find({ hostId });
+      const totalEvents = events.length;
+  
+      const upcomingEvents = events.filter(event => {
+        const eventDate = new Date(`${event.date}T${event.time}`);
+        return eventDate > new Date();
+      }).length;
+  
+      const totalAttendees = events.reduce((sum, event) => {
+        return sum + event.registeredUsers.reduce((acc, user) => acc + (user.quantity || 1), 0);
+      }, 0);
+  
+      res.json({ totalEvents, upcomingEvents, totalAttendees });
+    } catch (err) {
+      console.error("Error fetching host stats:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
   
 
 export default router;

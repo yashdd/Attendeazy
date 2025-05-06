@@ -19,9 +19,16 @@ const eventSchema = new mongoose.Schema({
   },
   registeredUsers: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        default: 1
+      }
+    }
   ],
   isHighlight: {
     type: Boolean,

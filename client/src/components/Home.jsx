@@ -1,6 +1,20 @@
 // src/pages/Home.jsx
-
+import React, { useEffect, useState } from "react";
 export default function Home() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_BASE_URL}/session`, {
+      credentials: "include",
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.isUser || data.isHost || data.isAdmin) {
+          setIsLoggedIn(true);
+        }
+      });
+  }, []);
+
     return (
       <div className="pt-16">
         {/* Because navbar is fixed and ~4rem high, offset content by 16 */}
@@ -52,7 +66,7 @@ export default function Home() {
         </section>
   
         {/* CTA Section */}
-        <section className="bg-teal-50 py-10">
+      {!isLoggedIn && (<section className="bg-teal-50 py-10">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
               Ready to Join the Community?
@@ -67,7 +81,7 @@ export default function Home() {
               Create Account
             </a>
           </div>
-        </section>
+        </section>  )}
       </div>
     );
   }

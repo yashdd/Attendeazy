@@ -47,14 +47,12 @@ export default function Events() {
     fetchSessionAndEvents();
   }, []);
 
-  // Filter events based on search term and selected category
   const getFilteredCategories = () => {
     if (selectedCategory === "all" && !searchTerm) {
       return categories;
     }
     
     return categories.map(category => {
-      // If a specific category is selected, only show events from that category
       if (selectedCategory !== "all" && selectedCategory !== category.name) {
         return { ...category, events: [] };
       }
@@ -88,11 +86,8 @@ export default function Events() {
 
   return (
     <div className="pt-16 bg-gray-50 min-h-screen">
-      {/* Hero Banner with Parallax Effect */}
-      {/* Hero Banner with Improved Aesthetics */}
-{/* Hero Banner with Improved Aesthetics */}
+     
 <section className="relative bg-gradient-to-r from-teal-500 to-blue-600 text-white py-16 px-4 overflow-hidden">
-  {/* Subtle Decorative Elements */}
   <div className="absolute inset-0 bg-black opacity-10 z-0"></div>
   <div className="hidden md:block absolute -top-10 right-10 w-64 h-64 bg-white opacity-10 rounded-full"></div>
   <div className="hidden md:block absolute -bottom-20 left-10 w-80 h-80 bg-white opacity-10 rounded-full"></div>
@@ -296,10 +291,8 @@ export default function Events() {
         </div>
       </section>
 
-      {/* CTA Section with Background Pattern */}
       {(!isHost && !isUser) && (
         <section className="bg-gradient-to-r from-blue-500 to-teal-400 py-16 px-4 relative overflow-hidden">
-          {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-white"></div>
             <div className="absolute -bottom-40 -left-20 w-96 h-96 rounded-full bg-white"></div>
@@ -321,7 +314,7 @@ export default function Events() {
                 Login as Host
               </a>
               <a
-                href="/hostRegister"
+                href="/register"
                 className="bg-gray-900 hover:bg-gray-800 text-white py-3 px-8 rounded-md text-base font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 Register as Host

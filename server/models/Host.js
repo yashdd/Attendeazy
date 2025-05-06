@@ -1,4 +1,3 @@
-// models/Host.js
 import mongoose from 'mongoose';
 
 const hostSchema = new mongoose.Schema({

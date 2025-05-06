@@ -1,22 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
-export default function AddEvent() {
+export default function EditEvent() {
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const { event } = state || {};
+
   const [step, setStep] = useState(1);
   const [preview, setPreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
 
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    date: "",
-    time: "",
-    location: "",
-    price: 0,
-    category: "",
-    isHighlight: false,
+    title: event?.title || "",
+    description: event?.description || "",
+    date: event?.date || "",
+    time: event?.time || "",
+    location: event?.location || "",
+    price: event?.price || 0,
+    category: event?.category || "",
+    isHighlight: event?.isHighlight || false,
   });
 
   const handleChange = (e) => {
@@ -42,58 +46,37 @@ export default function AddEvent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const baseURL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
-      const payload = new FormData();
-
-      for (const key in formData) {
-        payload.append(key, formData[key]);
+    if (!preview && !imageFile) {
+        toast.error("Please upload an image.");
+        return;
       }
-      if (imageFile) payload.append("image", imageFile);
-
-      const loadingToast = toast.loading("Creating your event...");
-      const res = await fetch(`${baseURL}/events/add`, {
-        method: "POST",
-        credentials: "include",
-        body: payload,
-      });
-
-      toast.dismiss(loadingToast);
-      const result = await res.json();
-
-      if (!res.ok) {
-        toast.error(result.message || "Failed to add event");
-      } else {
-        toast.success("Event created successfully!", {
-          style: {
-            border: '1px solid #8B5CF6',
-            padding: '16px',
-            color: '#4C1D95',
-          },
-          iconTheme: {
-            primary: '#8B5CF6',
-            secondary: '#FFFFFF',
-          },
-          duration: 5000,
-        });
-
-        setFormData({
-          title: "",
-          description: "",
-          date: "",
-          time: "",
-          location: "",
-          price: 0,
-          category: "",
-          isHighlight: false,
-        });
-        setImageFile(null);
-        navigate("/hosts/dashboard/my-events");
-      }
-    } catch (err) {
-      toast.error("Server error, please try again later");
+    const baseURL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+    const payload = new FormData();
+  
+    for (const key in formData) {
+      payload.append(key, formData[key]);
+    }
+    if (imageFile) payload.append("image", imageFile);
+  
+    const loadingToast = toast.loading("Updating your event...");
+    
+    const res = await fetch(`${baseURL}/events/edit/${event._id}`, {
+      method: "PATCH",
+      credentials: "include",
+      body: payload,
+    });
+  
+    toast.dismiss(loadingToast);
+    const result = await res.json();
+  
+    if (!res.ok) {
+      toast.error(result.message || "Failed to update event");
+    } else {
+      toast.success("Event updated successfully!");
+      navigate("/hosts/dashboard/my-events");
     }
   };
+  
 
   const nextStep = () => {
     if (step === 1 && (!formData.title || !formData.description || !formData.category)) {
@@ -125,13 +108,18 @@ export default function AddEvent() {
     Hangout: "🧍‍♂️"
   };
 
+  useEffect(() => {
+    if (event?.image) {
+      setPreview(`${import.meta.env.VITE_BASE_URL}${event.image}`);
+    }
+  }, [event]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-10 px-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-indigo-600">
-            Create New Event
+            Edit Event
           </h1>
           <p className="text-gray-600">Share your amazing events with the world</p>
         </div>
@@ -316,7 +304,7 @@ export default function AddEvent() {
                   accept="image/*"
                   onChange={handleImageChange}
                   className={`w-full ${preview ? 'hidden' : 'opacity-0 absolute inset-0 cursor-pointer h-full'}`}
-                  required
+                  
                 />
               </div>
               

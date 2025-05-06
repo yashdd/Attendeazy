@@ -2,11 +2,19 @@ import React, { useEffect, useState } from "react";
 import EventCard from "./EventCard";
 import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function MyEvents() {
+  const navigate = useNavigate();
+
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const showControls = true
+
+  const handleEdit = (event) => {
+    navigate(`/hosts/dashboard/edit/${event._id}`, { state: { event } });
+  };
+
   const fetchMyEvents = async () => {
     try {
       const baseURL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
@@ -36,7 +44,7 @@ export default function MyEvents() {
 
     try {
       const baseURL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
-      const res = await fetch(`${baseURL}/events/${eventId}`, {
+      const res = await fetch(`${baseURL}/events/delete/${eventId}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -69,15 +77,15 @@ export default function MyEvents() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
-            <Link to={`/hosts/dashboard/my-events/${event._id}`} key={event._id}>
+            // <Link to={`/hosts/dashboard/my-events/${event._id}`} key={event._id}>
             <EventCard
               key={event._id}
               event={event}
               showControls={true}
-              // onDelete={handleDelete}
-              // onEdit={(e) => console.log("Edit clicked for:", e._id)} // placeholder for now
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
-            </Link>
+            // </Link>
           ))}
         </div>
       )}

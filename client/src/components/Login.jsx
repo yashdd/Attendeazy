@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function UserLogin() {
@@ -8,6 +8,20 @@ export default function UserLogin() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const checkSession = async () => {
+      const baseURL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+      const res = await fetch(`${baseURL}/session`, { credentials: "include" });
+      const data = await res.json();
+  
+      if (data.isUser) navigate("/users/dashboard");
+      if (data.isHost) navigate("/hosts/dashboard");
+    };
+  
+    checkSession();
+  }, []);
+
+  
   const handleLogin = (e) => {
     e.preventDefault();
     setIsLoading(true);

@@ -15,15 +15,16 @@ export default function MyTickets() {
       const params = new URLSearchParams(location.search);
       const sessionId = params.get("session_id");
       const eventId = params.get("eventId");  
+      const quantity = params.get("quantity");
 
-      if (sessionId && eventId) {
+      if (sessionId && eventId && quantity) {
         try {
           const baseURL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
           const res = await fetch(`${baseURL}/users/register-event`, {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ eventId }),
+            body: JSON.stringify({ eventId, quantity }),
           });
 
           const data = await res.json();
@@ -48,12 +49,17 @@ export default function MyTickets() {
     const fetchRegisteredEvents = async () => {
       try {
         const baseURL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
-        const res = await fetch(`${baseURL}/users/my-registered-events`, {
+        // const res = await fetch(`${baseURL}/users/my-registered-events`, {
+        //   credentials: "include",
+        // });
+        const res = await fetch(`${baseURL}/tickets/my`, {
           credentials: "include",
         });
+        
         const data = await res.json();
+        console.log("Data fetched:", data); // Debugging line
         if (res.ok) {
-            setEvents(data.events); // ✅ Correct
+            setEvents(data); 
           } else {
           console.error("Failed to fetch registered events:", data.message);
         }
@@ -79,11 +85,19 @@ export default function MyTickets() {
         <div className="text-center text-gray-600">No events registered yet.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-         {events.map((event) => (
-            <Link to={`/events/${event._id}`} key={event._id}>
-            <RegisteredEventCard event={event} />
-          </Link>
-            ))}
+         {events.map((ticket, idx) => {
+  const { event, quantity, attended, userId } = ticket;
+  return (
+    // <Link to={`/events/${event._id}`} key={event._id || idx}>
+      <RegisteredEventCard
+        event={event}
+        quantity={quantity}
+        attended={attended}
+        userId={userId}
+      />
+    // </Link>
+      );
+      })}
         </div>
       )}
     </div>

@@ -1,6 +1,9 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import Host from '../models/Host.js';
+import Event from '../models/Event.js';
+import Review from '../models/Review.js';
+
 const router = express.Router();
 
 
@@ -39,6 +42,7 @@ router.post('/register', async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 });
+
 router.post('/login', async (req, res) => {
   try {
     console.log("Reacheds host login route")
@@ -104,7 +108,33 @@ router.get('/session', (req, res) => {
     isHost: req.session?.isHost || false,
     isUser: req.session?.isUser || false,
     email: req.session?.email || null,
+    hostId: req.session?.hostId || null,
   });
+});
+
+router.get("/:hostId/average-rating", async (req, res) => {
+  const { hostId } = req.params;
+
+  try {
+    const hostEvents = await Event.find({ hostId: hostId.toString() }, "_id");
+    const eventIds = hostEvents.map(e => e._id);
+    if (eventIds.length === 0) {
+      return res.json({ averageRating: 0 });
+    }
+
+    // Step 2: Aggregate reviews for those events
+    const result = await Review.aggregate([
+      { $match: { eventId: { $in: eventIds } } },
+      { $group: { _id: null, avgRating: { $avg: "$rating" } } }
+    ]);
+
+    const avg = result[0]?.avgRating || 0;
+
+    res.json({ averageRating: avg.toFixed(1) });
+  } catch (err) {
+    console.error("Host avg rating error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 export default router;

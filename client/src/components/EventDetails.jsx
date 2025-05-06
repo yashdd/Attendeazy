@@ -7,7 +7,26 @@ export default function EventDetails({}) {
   const navigate = useNavigate();
   const { id } = useParams();
   const [event, setEvent] = useState(null);
+  const [isUser, setIsUser] = useState(false);
+  const [isHost, setisHost] = useState(false);
 
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BASE_URL}/session`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+        setIsUser(data.isUser);
+        setisHost(data.isHost);
+      } catch (err) {
+        console.error("Session check failed:", err);
+      }
+    };
+  
+    fetchSession();
+  }, []);
+  
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -54,13 +73,11 @@ export default function EventDetails({}) {
       alert("Event data is not loaded properly!");
       return;
     }
-    if (!event.price || isNaN(event.price)) {
+    if (typeof event.price !== "number" || isNaN(event.price)) {
       alert("Event price is not loaded properly!");
       return
     }
     
-    console.log(event)
-    console.log(event._id)
     setIsProcessing(true);
   
     try {
@@ -301,30 +318,42 @@ export default function EventDetails({}) {
                   <span className="font-bold text-gray-900">${(event.price * ticketQuantity * 1.05).toFixed(2)}</span>
                 </div>
                 
-                <button
-                  onClick={handleCheckout}
-                  disabled={isProcessing}
-                  className={`w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium ${
-                    isProcessing ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
-                  } text-white transition-colors`}
-                >
-                  {isProcessing ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      Checkout with Stripe
-                      <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                      </svg>
-                    </>
-                  )}
-                </button>
+                {isUser ? (
+                  <button
+                    onClick={handleCheckout}
+                    disabled={isProcessing}
+                    className={`w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium ${
+                      isProcessing ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+                    } text-white transition-colors`}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        Checkout with Stripe
+                        <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                      </>
+                    )}
+                  </button>
+                ) : isHost ? (
+                  <p className="text-red-600 text-sm mt-4 text-center font-semibold">
+                    Hosts cannot register for events.
+                  </p>
+                ) : (
+                  <p className="text-red-500 text-sm mt-4 text-center">
+                    Please <a href="/login" className="text-indigo-600 underline">log in</a> to proceed with checkout.
+                  </p>
+                )}
+
+
                 
                 <p className="text-xs text-gray-500 text-center mt-4">
                   By clicking "Checkout," you agree to AttendEazy's terms and conditions and privacy policy.
@@ -345,34 +374,7 @@ export default function EventDetails({}) {
           </div>
         </div>
         
-        {/* Related Events Section */}
-        {/* {relatedEvents.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">You May Also Like</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedEvents.map((relatedEvent) => (
-                <div 
-                  key={relatedEvent._id} 
-                  className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 cursor-pointer"
-                  onClick={() => navigate(`/events/${relatedEvent._id}`)}
-                >
-                  <div className="h-48 overflow-hidden relative">
-                    <img 
-                      src={`${import.meta.env.VITE_BASE_URL}${relatedEvent.image}`}
-                      alt={relatedEvent.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
-                    <div className="absolute bottom-0 left-0 p-4">
-                      <h3 className="text-lg font-bold text-white">{relatedEvent.title}</h3>
-                      <p className="text-white/80 text-sm">{formatDate(relatedEvent.date)}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )} */}
+       
       </div>
     </div>
   );

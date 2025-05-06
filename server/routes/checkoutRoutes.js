@@ -25,8 +25,8 @@ router.post("/create-session", async (req, res) => {
     }
 
     // 2. Prepare price and title
-    const priceInCents = Math.round(Number(event.price) * 100);
-    if (isNaN(priceInCents) || priceInCents <= 0) {
+    const priceInCents = Math.round(Number(event.price) * 100) ;
+    if (isNaN(priceInCents) || priceInCents < 0) {
       return res.status(400).json({ message: "Invalid event price" });
     }
 
@@ -41,12 +41,12 @@ router.post("/create-session", async (req, res) => {
             product_data: {
               name: event.title,
             },
-            unit_amount: priceInCents,
+            unit_amount: priceInCents*1.05,
           },
           quantity,
         },
       ],
-      success_url: `${process.env.CLIENT_URL || "http://localhost:5173"}/users/dashboard/my-tickets?session_id={CHECKOUT_SESSION_ID}&eventId=${event._id}`,
+      success_url: `${process.env.CLIENT_URL || "http://localhost:5173"}/users/dashboard/my-tickets?session_id={CHECKOUT_SESSION_ID}&eventId=${event._id}&quantity=${req.body.quantity}`,
       cancel_url: `${process.env.CLIENT_URL || "http://localhost:5173"}/events/${event._id}`,
     });
 

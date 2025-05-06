@@ -5,6 +5,8 @@ import Event from '../models/Event.js';
 import session from 'express-session';
 import { verifyUser } from '../middlewares/authMiddleware.js';
 import mongoose from 'mongoose';
+import Ticket from '../models/Tickets.js'; // Assuming you have a Ticket model
+
 
 const router = express.Router();
 router.post('/register', async (req, res) => {
@@ -126,10 +128,13 @@ router.post('/login', async (req, res) => {
       res.status(500).json({ message: "Server error" });
     }
   });
+ 
   router.get("/my-registered-events", verifyUser, async (req, res) => {
     try {
       const userId = req.session.userId;
-      const events = await Event.find({ registeredUsers: userId });
+      const events = await Event.find({
+        registeredUsers: { $elemMatch: { userId: userId } }
+      });
   
       res.json({ events });
     } catch (err) {
@@ -139,13 +144,16 @@ router.post('/login', async (req, res) => {
   });
 
   
+    
   router.post("/register-event", verifyUser, async (req, res) => {
     try {
-      const { eventId } = req.body;
+      const { eventId, quantity } = req.body;
       const userId = req.session.userId;
-      console.log(eventId)
-      if (!eventId) {
-        return res.status(400).json({ message: "Event ID is required" });
+  
+      const qty = parseInt(quantity); // ✅ Ensure it's a number
+  
+      if (!eventId || !qty || isNaN(qty) || qty <= 0) {
+        return res.status(400).json({ message: "Invalid Event ID or Quantity" });
       }
   
       const user = await User.findById(userId);
@@ -155,32 +163,53 @@ router.post('/login', async (req, res) => {
         return res.status(404).json({ message: "User or Event not found" });
       }
   
-      // Ensure arrays exist
-      if (!Array.isArray(user.registeredEvents)) {
-        user.registeredEvents = [];
-      }
-      if (!Array.isArray(event.registeredUsers)) {
-        event.registeredUsers = [];
+      // --- Update user.registeredEvents ---
+      if (!Array.isArray(user.registeredEvents)) user.registeredEvents = [];
+  
+      const userEvent = user.registeredEvents.find(e => e.eventId.toString() === eventId);
+      if (userEvent) {
+        userEvent.quantity += qty;
+      } else {
+        user.registeredEvents.push({ eventId, quantity: qty }); // ✅ use qty
       }
   
-      // Push event to user if not already registered
-      if (!user.registeredEvents.includes(eventId)) {
-        user.registeredEvents.push(eventId);
-        await user.save();
+      await user.save();
+  
+      // --- Update event.registeredUsers ---
+      if (!Array.isArray(event.registeredUsers)) event.registeredUsers = [];
+  
+      const existingUser = event.registeredUsers.find(e => e.userId.toString() === userId);
+      if (existingUser) {
+        existingUser.quantity += qty;
+      } else {
+        event.registeredUsers.push({ userId, quantity: qty }); // ✅ use qty
       }
   
-      // Push user to event if not already registered
-      if (!event.registeredUsers.includes(userId)) {
-        event.registeredUsers.push(userId);
-        await event.save();
+      await event.save();
+  
+      // --- Create or Update Ticket ---
+      const existingTicket = await Ticket.findOne({ userId, eventId });
+      if (existingTicket) {
+        existingTicket.quantity += qty;
+        await existingTicket.save();
+      } else {
+        await Ticket.create({
+          userId,
+          eventId,
+          quantity: qty,
+          attended: false,
+        });
       }
   
       res.json({ message: "Event registered successfully" });
+  
     } catch (err) {
       console.error("Register event error:", err);
       res.status(500).json({ message: "Server error" });
     }
   });
+  
+  
   
   
 

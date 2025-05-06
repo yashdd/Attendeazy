@@ -18,7 +18,12 @@ import EventDetails from "./components/EventDetails.jsx";
 import UserDashboard from "./components/UserDashboard/UserDashboard.jsx";
 import EditUserProfile from "./components/UserDashboard/EditUserProfile.jsx";
 import MyTickets from "./components/UserDashboard/MyTickets.jsx";
-
+import About from "./components/About.jsx";
+import Contact from "./components/Contact.jsx";
+import UserEvents from "./components/UserDashboard/UserEvents.jsx";
+import Tp from "./components/tp.jsx";
+import EditEvent from "./components/EditEvent.jsx";
+import HostQRScanner from "./components/HostScanner.jsx";
 
 function App() {
   const [showFooter, setShowFooter] = useState(false);
@@ -44,6 +49,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/hostLogin" element={<HostLogin />} />
@@ -54,9 +61,12 @@ function App() {
             <Route path="/events/:id" element={<EventDetails />} />
             <Route path="/users/dashboard" element={<UserDashboard />} />
             <Route path="/users/dashboard/edit-profile" element={<EditUserProfile />} />
-            <Route path="/users/dashboard/my-tickets" element={<MyTickets />} />
+            <Route path="/users/dashboard/my-tickets" element={<MyTickets />} />  
+            <Route path="/users/dashboard/userevents" element={<UserEvents />} />
+            <Route path="/tp" element={<Tp />} />
+            <Route path="/hosts/dashboard/edit/:id"  element={<EditEvent />} />
+            <Route path="/hosts/dashboard/my-events/attendance/:eventId" element={<HostQRScanner />} />
 
-            {/* Add more routes as needed */}
 
 
             

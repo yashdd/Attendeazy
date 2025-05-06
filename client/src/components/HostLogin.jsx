@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function HostLogin() {
   const [email, setEmail] = useState("");
@@ -6,6 +6,20 @@ export default function HostLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    const checkSession = async () => {
+      const baseURL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+      const res = await fetch(`${baseURL}/session`, { credentials: "include" });
+      const data = await res.json();
+  
+      if (data.isUser) navigate("/users/dashboard");
+      if (data.isHost) navigate("/hosts/dashboard");
+    };
+  
+    checkSession();
+  }, []);
+
+  
   const handleHostLogin = (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -141,7 +155,7 @@ export default function HostLogin() {
                 <div className="flex flex-col space-y-4">
                   <p className="text-sm text-gray-600 text-center">
                     Don't have a host account yet?{" "}
-                    <a href="/host-register" className="text-teal-600 hover:underline font-medium">
+                    <a href="/register" className="text-teal-600 hover:underline font-medium">
                       Register as a Host
                     </a>
                   </p>

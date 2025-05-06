@@ -1,15 +1,12 @@
- 
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [session, setSession] = useState(null);
 
   const baseURL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
-
- const navigate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(`${baseURL}/session`, {
@@ -18,14 +15,13 @@ export default function Navbar() {
       .then((res) => res.json())
       .then((data) => setSession(data))
       .catch((err) => console.error("Session fetch failed", err));
-      console.log("Session data:", session)
   }, []);
   
   const handleLogout = async () => {
     try {
       const res = await fetch(`${baseURL}/users/logout`, {
         method: "POST",
-        credentials: "include", //  
+        credentials: "include",
       });
   
       if (res.ok) {
@@ -41,6 +37,8 @@ export default function Navbar() {
       alert("Something went wrong during logout.");
     }
   };
+
+  // Removed helper function to maintain original functionality
   
   return (
     <nav className="fixed w-full top-0 left-0 z-50 bg-gray-900 text-white">
@@ -67,7 +65,8 @@ export default function Navbar() {
               </span>
               <a href={session.isHost ? "/hosts/dashboard" : "/users/dashboard"}
                 className="py-1 px-3 bg-indigo-600 text-white rounded hover:bg-indigo-500 transition">
-                Dashboard  </a>
+                Dashboard
+              </a>
               <button
                 onClick={handleLogout}
                 className="py-1 px-3 bg-red-600 text-white rounded hover:bg-red-500 transition"
@@ -98,6 +97,7 @@ export default function Navbar() {
         <button
           className="md:hidden focus:outline-none"
           onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
         >
           <svg
             className="w-6 h-6"
@@ -106,7 +106,11 @@ export default function Navbar() {
             strokeWidth="2"
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            {menuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            )}
           </svg>
         </button>
       </div>
@@ -114,37 +118,41 @@ export default function Navbar() {
       {/* Mobile Dropdown */}
       {menuOpen && (
         <div className="md:hidden bg-gray-900 border-t border-gray-700">
-          <ul className="flex flex-col space-y-1 p-4">
-            <li><a href="#home" className="block hover:text-gray-300">Home</a></li>
-            <li><a href="#events" className="block hover:text-gray-300">Events</a></li>
-            <li><a href="#about" className="block hover:text-gray-300">About</a></li>
-            <li><a href="#contact" className="block hover:text-gray-300">Contact</a></li>
+          <ul className="flex flex-col space-y-3 p-4">
+            <li><a href="/" className="block py-1 hover:text-gray-300">Home</a></li>
+            <li><a href="/events" className="block py-1 hover:text-gray-300">Events</a></li>
+            <li><a href="/about" className="block py-1 hover:text-gray-300">About</a></li>
+            <li><a href="/contact" className="block py-1 hover:text-gray-300">Contact</a></li>
           </ul>
-          <div className="flex flex-col px-4 space-y-2 border-t border-gray-700 py-4">
+          <div className="flex flex-col px-4 space-y-3 border-t border-gray-700 py-4">
           {session?.email ? (
               <>
                 <span className="text-sm text-gray-300">
                   {session.isUser ? "User" : "Host"}: {session.email}
                 </span>
+                <a href={session.isHost ? "/hosts/dashboard" : "/users/dashboard"}
+                  className="py-2 px-3 bg-indigo-600 text-white rounded hover:bg-indigo-500 text-center transition">
+                  Dashboard
+                </a>
                 <button
                   onClick={handleLogout}
-                  className="bg-red-600 text-white py-1 rounded hover:bg-red-500"
+                  className="bg-red-600 text-white py-2 rounded hover:bg-red-500 transition"
                 >
                   Logout
                 </button>
               </>
             ) : (
               <>
-                <a href="/login" className="hover:text-gray-300">Log In</a>
+                <a href="/login" className="py-2 hover:text-gray-300 text-center">Log In</a>
                 <a
                   href="/register"
-                  className="py-1 px-3 bg-teal-500 text-gray-900 rounded hover:bg-teal-400 text-center"
+                  className="py-2 px-3 bg-teal-500 text-gray-900 rounded hover:bg-teal-400 text-center transition"
                 >
                   Sign Up
                 </a>
                 <a
                   href="/hostLogin"
-                  className="py-1 px-3 bg-gray-700 text-white rounded hover:bg-gray-600 text-center"
+                  className="py-2 px-3 bg-gray-700 text-white rounded hover:bg-gray-600 text-center transition"
                 >
                   Host
                 </a>
