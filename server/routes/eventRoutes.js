@@ -4,6 +4,10 @@ import multer from "multer";
 import path from "path";
 import { verifyHost } from '../middlewares/authMiddleware.js';
 import fs from "fs"
+import User from '../models/User.js';
+import Ticket from '../models/Tickets.js';  
+import Review from '../models/Review.js';  
+
 
 const router = express.Router();
 const uploadDir = path.join("assets", "eventImages");
@@ -161,7 +165,7 @@ router.post("/add", upload.single("image"), (req, res) => {
   
     try {
       const event = await Event.findById(req.params.id);
-  
+      const eventId = req.params.id;
       if (!event) {
         return res.status(404).json({ message: "Event not found" });
       }
@@ -171,6 +175,21 @@ router.post("/add", upload.single("image"), (req, res) => {
       }
   
       await event.deleteOne();
+
+      await User.updateMany(
+      {},
+      { $pull: { registeredEvents: { eventId } } }
+    );
+
+    await Event.updateMany(
+      {},
+      { $pull: { registeredUsers: { eventId } } }
+    );
+
+    await Ticket.deleteMany({ eventId });
+
+    await Review.deleteMany({ eventId });
+    console.log("Event deleted successfully and all related data cleaned up.");
       res.json({ message: "Event deleted successfully" });
     } catch (err) {
       console.error("Delete event error:", err);

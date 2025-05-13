@@ -1,11 +1,35 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
+import { useState } from "react";
 
 export default function EventCard({ event, onEdit, onDelete, showControls = false }) {
   const navigate = useNavigate();
+  const [summary, setSummary] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false); 
+
+  const handleSummarize = async () => {
+    setLoading(true);
+    setSummary("");
+    try {
+      console.log("Event data:", event);  
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/ai/summarize`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event }),  
+      });
+      const data = await res.json();
+      setSummary(data.summary);
+      setShowModal(true);
+    } catch (err) {
+      console.error("Summary error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
   const formatDate = (dateString) => {
-    
+
+   
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -13,6 +37,7 @@ export default function EventCard({ event, onEdit, onDelete, showControls = fals
       return dateString;
     }
   };
+
 
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100">
@@ -55,7 +80,30 @@ export default function EventCard({ event, onEdit, onDelete, showControls = fals
             </div>
             <div className="font-medium text-lg text-green-600">${event.price}</div>
           </div>
+          <button className="mt-3 text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded transition"   onClick={handleSummarize}>
+            {loading ? "Summarizing..." : "🧠 AI Summary"}
+          </button>
+          {showModal && summary && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
+                  <button
+                    className="absolute top-2 right-3 text-gray-400 hover:text-gray-600 text-xl"
+                    onClick={() => setShowModal(false)}
+                  >
+                    ✖
+                  </button>
 
+                  <h3 className="text-lg font-bold text-indigo-700 mb-2">🧠 AI Summary</h3>
+
+                  {/* Show loading inside modal if still loading */}
+                  {loading ? (
+                    <p className="text-sm text-gray-500">Generating summary...</p>
+                  ) : (
+                    <p className="text-sm text-gray-800 whitespace-pre-line">{summary}</p>
+                  )}
+                </div>
+              </div>
+            )}
           {showControls && (
             <div className="flex space-x-2">
               <button

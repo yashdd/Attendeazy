@@ -10,6 +10,7 @@ export default function Events() {
   const [isUser, setIsUser] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -273,12 +274,13 @@ export default function Events() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {category.events.map((event) => (
                       <Link 
-                        to={isHost ? `/hosts/dashboard/my-events/${event._id}` : `/events/${event._id}`} 
+                        // to={isHost ? `/hosts/dashboard/my-events/${event._id}` : `/events/${event._id}`} 
                         key={event._id}
                         className="block transform transition-all duration-300 hover:-translate-y-1"
                       >
                         <EventCard
                           event={event}
+
                           showControls={isHost}
                         />
                       </Link>

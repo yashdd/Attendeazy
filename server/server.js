@@ -12,7 +12,7 @@ import { fileURLToPath } from "url";
 import { verifyUser, verifyHost, redirectIfLoggedIn, requireLogin } from './middlewares/authMiddleware.js';
 import ticketRoutes from './routes/ticketRoutes.js';  
 import reviewRoutes from './routes/reviewRoutes.js';
-
+import aiRoutes from './routes/aiRoutes.js';
 
 dotenv.config();    
 connectDB();        
@@ -59,6 +59,7 @@ app.use('/hosts', hostRoutes);
 app.use('/events/register-event', verifyUser);       
 app.use('/events/add', verifyHost);         
 
+app.use('/ai', aiRoutes);
 app.use('/events', eventRoutes);
 app.use('/reviews', verifyUser, reviewRoutes);
 app.use('/tickets', ticketRoutes); 

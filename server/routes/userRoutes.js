@@ -209,15 +209,49 @@ router.post('/login', async (req, res) => {
     }
   });
   
-  
-  
-  
-
+    
   router.post('/logout', (req, res) => {
     req.session.destroy(() => {
       res.clearCookie('connect.sid');
       res.json({ message: 'Logged out' });
     });
   });
+
+  
+    router.get("/stats", verifyUser, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const user = await User.findById(userId);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const now = new Date();
+    const registeredEvents = user.registeredEvents || [];
+
+    let myTickets = 0;
+    let upcomingEvents = 0;
+    let pastEvents = 0;
+
+    const eventIds = registeredEvents.map(e => e.eventId);
+    const events = await Event.find({ _id: { $in: eventIds } });
+
+    for (const reg of registeredEvents) {
+      const event = events.find(ev => ev._id.toString() === reg.eventId.toString());
+      if (!event) continue;
+
+      const eventDate = new Date(`${event.date}T${event.time}`);
+      myTickets += reg.quantity;
+
+      if (eventDate > now) upcomingEvents++;
+      else pastEvents++;
+    }
+console.log("User stats:", { myTickets, upcomingEvents, pastEvents });
+    res.json({ myTickets, upcomingEvents, pastEvents });
+  } catch (err) {
+    console.error("User stats error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
   
 export default router;
