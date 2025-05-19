@@ -24,6 +24,7 @@ import UserEvents from "./components/UserDashboard/UserEvents.jsx";
 import Tp from "./components/tp.jsx";
 import EditEvent from "./components/EditEvent.jsx";
 import HostQRScanner from "./components/HostScanner.jsx";
+import PageWrapper from "./components/PageWrapper.jsx";
 
 function App() {
   const [showFooter, setShowFooter] = useState(false);
@@ -49,7 +50,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
-            <Route path="/about" element={<About />} />
+            <Route path="/about" element={<PageWrapper background="bg-gradient-to-b from-blue-50 to-indigo-100">    <About />    </PageWrapper>    }/>
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

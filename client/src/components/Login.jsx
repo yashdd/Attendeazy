@@ -42,7 +42,7 @@ export default function UserLogin() {
           setError(errorData.message || "Login failed");
           return;
         }
-        window.location.href = "/";
+        window.location.href = "/users/dashboard"; 
       })
       .catch((err) => {
         console.error("Error logging in:", err);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import EventCard from "../EventCard";
+import RegisteredEventCard from "./RegisteredEventCard";
+
 
 export default function UserEvents() {
   const [events, setEvents] = useState([]);
@@ -83,7 +84,7 @@ export default function UserEvents() {
         {upcomingEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {upcomingEvents.map((event) => (
-              <EventCard key={event._id} event={event} />
+              <RegisteredEventCard key={event._id} event={event} />
             ))}
           </div>
         ) : (
@@ -110,7 +111,7 @@ export default function UserEvents() {
         {attendedEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {attendedEvents.map((event) => (
-              <EventCard key={event._id} event={event} />
+              <RegisteredEventCard key={event._id} event={event} />
             ))}
           </div>
         ) : (

@@ -45,14 +45,13 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    console.log("Reacheds host login route")
     const { email, password } = req.body;
 
     const foundHost = await Host.findOne({ email });
     if (!foundHost) {
       return res.status(400).json({ message: 'Host not found' });
     }
-    console.log("Found host:", foundHost)
+
     const isMatch = await bcrypt.compare(password, foundHost.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -63,7 +62,6 @@ router.post('/login', async (req, res) => {
     req.session.email = foundHost.email;
     req.session.hostId = foundHost._id;
 
-    console.log("Host session after login:", req.session);
 
     return res.json({
       message: 'Login successful!',
@@ -80,21 +78,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// router.get("/dashboard", (req, res) => {
-//   console.log("Session on /dashboard route:", req.session.isHost);
-
-//   if (req.session.isHost) {
-//     return res.json({
-//       message: "Host dashboard access granted",
-//       email: req.session.email,
-//       hostId: req.session.userId,
-//     });
-    
-    
-//   } else {
-//     return res.status(401).json({ message: "Unauthorized: Not a host" });
-//   }
-// });
 
 router.post('/logout', (req, res) => {
   req.session.destroy(() => {
@@ -122,7 +105,6 @@ router.get("/:hostId/average-rating", async (req, res) => {
       return res.json({ averageRating: 0 });
     }
 
-    // Step 2: Aggregate reviews for those events
     const result = await Review.aggregate([
       { $match: { eventId: { $in: eventIds } } },
       { $group: { _id: null, avgRating: { $avg: "$rating" } } }

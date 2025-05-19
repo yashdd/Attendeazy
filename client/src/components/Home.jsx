@@ -56,7 +56,7 @@ export default function Home() {
     
   const handleLoginRequired = (url) => {
     if (!isLoggedIn) {
-      window.location.href = "/login";
+      window.location.href = "/hostLogin";
       return;
     }
     window.location.href = url;
@@ -111,7 +111,7 @@ export default function Home() {
             Browse Events
           </a>
           <button
-            onClick={() => handleLoginRequired("/create-event")}
+            onClick={() => handleLoginRequired("/hosts/dashboard/add")}
             className="bg-white hover:bg-gray-100 text-gray-900 py-3 px-8 rounded-lg text-sm font-medium transform hover:scale-105 transition-transform"
           >
             Host an Event

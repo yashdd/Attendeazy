@@ -40,7 +40,7 @@ export default function HostLogin() {
           setError(errorData.message || "Host login failed");
           return;
         }
-        window.location.href = "/hosts/dashboard"; // Redirect to host dashboard
+        window.location.href = "/hosts/dashboard";  
       })
       .catch((err) => {
         console.error("Host login error:", err);
